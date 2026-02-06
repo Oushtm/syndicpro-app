@@ -24,6 +24,7 @@ export const DataProvider = ({ children }) => {
     const [loadingApartments, setLoadingApartments] = useState(true);
     const [loadingPayments, setLoadingPayments] = useState(true);
     const [loadingExpenses, setLoadingExpenses] = useState(true);
+    const [loadingAppSettings, setLoadingAppSettings] = useState(true);
 
     // Errors
     const [error, setError] = useState(null);
@@ -83,6 +84,26 @@ export const DataProvider = ({ children }) => {
         }
     }, [selectedYear]);
 
+    const fetchAppSettings = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('settings')
+                .select('*')
+                .eq('id', 'app')
+                .single();
+
+            if (error && error.code !== 'PGRST116') throw error;
+            if (data) {
+                setAppSettings(data);
+            }
+        } catch (err) {
+            console.error("Error fetching settings:", err);
+            setError(err);
+        } finally {
+            setLoadingAppSettings(false);
+        }
+    }, []);
+
     // Initial Fetch & Realtime Subscription
     useEffect(() => {
         if (!user) {
@@ -95,10 +116,12 @@ export const DataProvider = ({ children }) => {
         setLoadingApartments(true);
         setLoadingPayments(true);
         setLoadingExpenses(true);
+        setLoadingAppSettings(true);
 
         fetchApartments();
         fetchPayments();
         fetchExpenses();
+        fetchAppSettings();
 
         // Realtime Subscription
         const channel = supabase
