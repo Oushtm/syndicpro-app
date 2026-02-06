@@ -75,10 +75,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Role-Based Access Control (RBAC) Helpers
-    const isAdmin = () => userProfile?.role === 'admin';
-    const canModify = () => userProfile?.role === 'admin' || userProfile?.role === 'editor';
+    const isAdmin = () => userProfile?.role === 'admin' || userProfile?.permissions?.canManageUsers === true;
+    const canModify = () => userProfile?.permissions?.canModify === true || isAdmin();
     const canView = () => !!user;
-    const canManageUsers = () => userProfile?.role === 'admin';
+    const canManageUsers = () => userProfile?.permissions?.canManageUsers === true;
 
     return (
         <AuthContext.Provider value={{

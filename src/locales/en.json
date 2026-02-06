@@ -57,7 +57,8 @@
         "negative_balance_alert_year": "Expenses exceed income for this year.",
         "manual_entry": "Direct Manual Controls",
         "export_report": "Export PDF Report",
-        "syncing": "Syncing Data..."
+        "syncing": "Syncing Data...",
+        "fiscal_year": "Fiscal Year"
     },
     "apartments": {
         "title": "Unit",
@@ -106,15 +107,26 @@
     "users": {
         "title": "Staff Management",
         "subtitle": "Manage roles and system permissions",
-        "create_btn": "Invite New User",
+        "create_btn": "Add User Account",
+        "create_modal_title": "Create New Staff Account",
+        "email": "Email Address",
+        "password": "Temporary Password",
+        "display_name": "Full Name",
+        "role": "Account Role",
+        "permissions": "System Permissions",
+        "can_view": "Access Records (Read Only)",
+        "can_modify": "Modify Data (Edit/Add)",
+        "can_manage_users": "Full Administrative Control",
         "loading_users": "Fetching staff profiles...",
-        "role_admin": "Administrator (Full Control)",
-        "role_editor": "Editor (Manage Content)",
-        "role_viewer": "Viewer (Read Only)",
+        "role_admin": "Administrator",
+        "role_editor": "Editor",
+        "role_viewer": "Viewer",
         "remove_user": "Remove User",
         "confirm_remove": "Are you sure you want to revoke access for this user?",
         "role_updated": "User role updated successfully",
-        "user_removed": "Access revoked successfully"
+        "user_removed": "Access revoked successfully",
+        "create_success": "Staff account created successfully!",
+        "creating": "Provisionsing account..."
     },
     "expenses_page": {
         "title": "Operational Costs",

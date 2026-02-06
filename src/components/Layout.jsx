@@ -9,7 +9,6 @@ import {
     Settings,
     LogOut,
     Users,
-    Search,
     Bell,
     Sun,
     Moon,
@@ -28,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 
 const Layout = () => {
     const { user, userProfile, logout, isAdmin, canManageUsers } = useAuth();
-    const { darkMode, toggleDarkMode, searchQuery, setSearchQuery } = useUI();
+    const { darkMode, toggleDarkMode } = useUI();
     const { t, i18n } = useTranslation();
     const { appSettings, error, hasPendingWrites } = useData();
     const navigate = useNavigate();
@@ -277,32 +276,11 @@ const Layout = () => {
                     justifyContent: 'space-between',
                     background: 'transparent'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                        <div className="header-search" style={{ position: 'relative', width: '300px' }}>
-                            <Search size={18} style={{
-                                position: 'absolute',
-                                [isRTL ? 'right' : 'left']: '1.25rem',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                color: 'var(--text-muted)'
-                            }} />
-                            <input
-                                type="text"
-                                placeholder={t('nav.search_placeholder')}
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    background: 'var(--bg-card)',
-                                    border: '1px solid var(--border-light)',
-                                    borderRadius: '1.5rem',
-                                    padding: isRTL ? '0.75rem 3.5rem 0.75rem 1rem' : '0.75rem 1rem 0.75rem 3.5rem',
-                                    boxShadow: 'var(--shadow-sm)',
-                                    fontSize: '0.9rem',
-                                    color: 'var(--text-primary)'
-                                }}
-                            />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '32px', height: '32px', background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800 }}>
+                            {(appSettings?.buildingName || 'S')[0].toUpperCase()}
                         </div>
+                        <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>{appSettings?.buildingName || 'SyndicPro'}</h1>
                     </div>
 
                     <div className="header-user" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

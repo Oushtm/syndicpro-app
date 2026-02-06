@@ -57,7 +57,8 @@
         "negative_balance_alert_year": "Les dépenses dépassent les revenus cette année.",
         "manual_entry": "Contrôles Manuels Directs",
         "export_report": "Exporter Rapport PDF",
-        "syncing": "Synchronisation des données..."
+        "syncing": "Synchronisation des données...",
+        "fiscal_year": "Exercice Fiscal"
     },
     "apartments": {
         "title": "Unité",
@@ -104,15 +105,26 @@
     "users": {
         "title": "Gestion du Personnel",
         "subtitle": "Gérer les rôles et les permissions du système",
-        "create_btn": "Inviter Utilisateur",
+        "create_btn": "Ajouter un Compte",
+        "create_modal_title": "Créer Nouveau Compte Personnel",
+        "email": "Adresse Email",
+        "password": "Mot de Passe Provisoire",
+        "display_name": "Nom Complet",
+        "role": "Rôle du Compte",
+        "permissions": "Permissions Système",
+        "can_view": "Accès aux Dossiers (Lecture)",
+        "can_modify": "Modifier Données (Éditer/Ajouter)",
+        "can_manage_users": "Contrôle Administratif Total",
         "loading_users": "Récupération des profils...",
-        "role_admin": "Administrateur (Contrôle Total)",
-        "role_editor": "Éditeur (Gérer Contenu)",
-        "role_viewer": "Lecteur (Lecture Seule)",
+        "role_admin": "Administrateur",
+        "role_editor": "Éditeur",
+        "role_viewer": "Lecteur",
         "remove_user": "Supprimer",
         "confirm_remove": "Êtes-vous sûr de vouloir révoquer l'accès pour cet utilisateur ?",
         "role_updated": "Rôle mis à jour avec succès",
-        "user_removed": "Accès révoqué avec succès"
+        "user_removed": "Accès révoqué avec succès",
+        "create_success": "Compte créé avec succès !",
+        "creating": "Configuration du compte..."
     },
     "expenses_page": {
         "title": "Coûts Opérationnels",

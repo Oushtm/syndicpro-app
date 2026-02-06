@@ -57,7 +57,8 @@
         "negative_balance_alert_year": "المصاريف تتجاوز المداخيل هذه السنة.",
         "manual_entry": "ضوابط يدوية مباشرة",
         "export_report": "تصدير تقرير PDF",
-        "syncing": "جاري مزامنة البيانات..."
+        "syncing": "جاري مزامنة البيانات...",
+        "fiscal_year": "السنة المالية"
     },
     "apartments": {
         "title": "سجل",
@@ -104,15 +105,26 @@
     "users": {
         "title": "إدارة الطاقم",
         "subtitle": "إدارة الأدوار وصلاحيات النظام",
-        "create_btn": "دعوة مستخدم جديد",
+        "create_btn": "إضافة حساب جديد",
+        "create_modal_title": "إنشاء حساب طاقم جديد",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور المؤقتة",
+        "display_name": "الاسم الكامل",
+        "role": "دور الحساب",
+        "permissions": "صلاحيات النظام",
+        "can_view": "الوصول للسجلات (قراءة فقط)",
+        "can_modify": "تعديل البيانات (إضافة/تعديل)",
+        "can_manage_users": "تحكم إداري كامل",
         "loading_users": "جاري جلب الملفات الشخصية...",
-        "role_admin": "مدير (تحكم كامل)",
-        "role_editor": "محرر (إدارة المحتوى)",
-        "role_viewer": "مشاهد (للقراءة فقط)",
-        "remove_user": "حذف مستخدم",
+        "role_admin": "مدير",
+        "role_editor": "محرر",
+        "role_viewer": "مشاهد",
+        "remove_user": "حذف",
         "confirm_remove": "هل أنت متأكد من رغبتك في إلغاء وصول هذا المستخدم؟",
         "role_updated": "تم تحديث دور المستخدم بنجاح",
-        "user_removed": "تم إلغاء الوصول بنجاح"
+        "user_removed": "تم إلغاء الوصول بنجاح",
+        "create_success": "تم إنشاء الحساب بنجاح!",
+        "creating": "جاري إعداد الحساب..."
     },
     "expenses_page": {
         "title": "التكاليف التشغيلية",

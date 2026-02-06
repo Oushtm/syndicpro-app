@@ -79,6 +79,9 @@ const Payments = () => {
 
                 if (error) throw error;
                 console.log(`Synced ${paymentsToInsert.length} payments for ${year}`);
+
+                // Instant Refresh
+                await actions.fetchPayments();
             } catch (err) {
                 console.error("Payment sync failed:", err);
                 // Don't alert for duplicate key errors as they are handled by ignoreDuplicates
@@ -177,10 +180,6 @@ const Payments = () => {
 
             // RTL Row Reversal check
             if (isAr) {
-                // For RTL table, we typically want columns to be visually ordered right-to-left.
-                // autoTable's `head` needs to be reversed, and `body` rows reversed.
-                // Visual Order (Right to Left): Unit | Owner | Jan ... Dec | Total
-                // Code Order (Left to Right): Total | Dec ... Jan | Owner | Unit
                 return row.reverse();
             }
             return row;
@@ -201,7 +200,7 @@ const Payments = () => {
                 font: 'Amiri', // CRITICAL
                 fontSize: 8,
                 cellPadding: 2,
-                halign: 'center' // Centered content looks better for status grid
+                halign: 'center'
             },
             headStyles: {
                 fillColor: [107, 102, 255],
@@ -210,12 +209,8 @@ const Payments = () => {
                 font: 'Amiri',
                 halign: 'center'
             },
-            columnStyles: {
-                // Adjust if needed, but 'grid' auto-widths often work well
-            },
             alternateRowStyles: { fillColor: [248, 250, 252] },
             didParseCell: (data) => {
-                // Optional: Custom styling for 'OK' or 'X'
                 if (data.section === 'body') {
                     if (data.cell.raw === 'OK') {
                         data.cell.styles.textColor = [16, 185, 129]; // Green
@@ -225,7 +220,6 @@ const Payments = () => {
             }
         });
 
-        // Footer
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
@@ -299,7 +293,7 @@ const Payments = () => {
                     <ProtectedAction requires="modify">
                         <button className="btn-ghost" style={{ height: '3rem', background: 'var(--bg-card)', border: 'none', boxShadow: 'var(--shadow-sm)', borderRadius: '1rem' }} onClick={exportPDF}>
                             <FileDown size={20} />
-                            <span>{t('payments.export')}</span>
+                            <span className="hide-mobile">{t('payments.export')}</span>
                         </button>
                     </ProtectedAction>
                 </div>
@@ -328,81 +322,144 @@ const Payments = () => {
                 </div>
             </div>
 
-            {/* Payments Table */}
-            <div className="card" style={{ padding: 0, overflow: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ background: 'var(--bg-table-header)', borderBottom: '2px solid var(--border-light)' }}>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', position: 'sticky', left: 0, background: 'var(--bg-table-header)', zIndex: 2 }}>
-                                <Building2 size={16} style={{ display: 'inline', marginInlineEnd: '0.5rem' }} />
-                                {t('apartments.unit')}
-                            </th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', minWidth: '150px', position: 'sticky', left: '80px', background: 'var(--bg-table-header)', zIndex: 2 }}>
-                                {t('apartments.owner')}
-                            </th>
-                            {months.map(m => (
-                                <th key={m.num} style={{ padding: '1rem', textAlign: 'center', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)', minWidth: '60px' }}>
-                                    {t(`months.${m.short.toLowerCase()}`)}
-                                </th>
-                            ))}
-                            <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', minWidth: '80px' }}>
-                                {t('common.total')}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredData.map(({ apartment, payments }) => {
-                            const paidCount = payments.filter(p => p.status === 'PAID').length;
-                            return (
-                                <tr key={apartment.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                                    <td style={{ padding: '1rem', fontWeight: 800, fontSize: '1rem', position: 'sticky', left: 0, background: 'var(--bg-card)', zIndex: 1 }}>
-                                        {apartment.number}
-                                    </td>
-                                    <td style={{ padding: '1rem', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', position: 'sticky', left: '80px', background: 'var(--bg-card)', zIndex: 1 }}>
+            {/* Payments View */}
+            <div className="hide-desktop">
+                <div className="mobile-payments-grid" style={{ display: 'grid', gap: '1rem' }}>
+                    {filteredData.map(({ apartment, payments }) => (
+                        <div key={apartment.id} className="card mobile-payment-card" style={{ padding: '1.25rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                                <div>
+                                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.25rem' }}>
+                                        {t('apartments.unit')} {apartment.number}
+                                    </h3>
+                                    <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                                         {apartment.resident_name || apartment.residentName || '-'}
-                                    </td>
-                                    {months.map(m => {
-                                        const payment = payments.find(p => Number(p.month) === Number(m.num));
-                                        const isPaid = payment?.status === 'PAID';
-                                        return (
-                                            <td key={m.num} style={{ padding: '0.5rem', textAlign: 'center' }}>
-                                                {payment && (
-                                                    <ProtectedAction requires="modify">
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.1 }}
-                                                            whileTap={{ scale: 0.95 }}
-                                                            onClick={() => togglePayment(payment)}
-                                                            style={{
-                                                                width: '36px',
-                                                                height: '36px',
-                                                                borderRadius: '8px',
-                                                                border: 'none',
-                                                                background: isPaid ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
-                                                                color: isPaid ? '#10b981' : '#f43f5e',
-                                                                cursor: 'pointer',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                        >
-                                                            {isPaid ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
-                                                        </motion.button>
-                                                    </ProtectedAction>
+                                    </p>
+                                </div>
+                                <div style={{ textAlign: 'right', background: 'var(--primary-bg)', padding: '0.4rem 0.8rem', borderRadius: '0.75rem' }}>
+                                    <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>
+                                        {payments.filter(p => p.status === 'PAID').length}/12
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="mobile-months-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
+                                {months.map(m => {
+                                    const payment = payments.find(p => Number(p.month) === Number(m.num));
+                                    const isPaid = payment?.status === 'PAID';
+                                    return (
+                                        <ProtectedAction key={m.num} requires="modify">
+                                            <button
+                                                onClick={() => payment && togglePayment(payment)}
+                                                className={`mobile-month-toggle ${isPaid ? 'paid' : ''}`}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    gap: '0.3rem',
+                                                    padding: '0.6rem 0.4rem',
+                                                    borderRadius: '0.8rem',
+                                                    background: isPaid ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-active)',
+                                                    border: `1.5px solid ${isPaid ? '#10b981' : 'transparent'}`,
+                                                    transition: 'all 0.2s',
+                                                    height: 'auto',
+                                                    width: '100%'
+                                                }}
+                                            >
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: isPaid ? '#10b981' : 'var(--text-muted)' }}>
+                                                    {t(`months.${m.short.toLowerCase()}`)}
+                                                </span>
+                                                {isPaid ? (
+                                                    <CheckCircle2 size={18} color="#10b981" />
+                                                ) : (
+                                                    <XCircle size={18} color="var(--text-muted)" opacity={0.4} />
                                                 )}
-                                            </td>
-                                        );
-                                    })}
-                                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 900, fontSize: '1rem' }}>
-                                        {paidCount}/12
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                                            </button>
+                                        </ProtectedAction>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
-        </div >
+
+            <div className="hide-mobile">
+                <div className="card" style={{ padding: 0, overflow: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ background: 'var(--bg-table-header)', borderBottom: '2px solid var(--border-light)' }}>
+                                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', position: 'sticky', left: 0, background: 'var(--bg-table-header)', zIndex: 2 }}>
+                                    <Building2 size={16} style={{ display: 'inline', marginInlineEnd: '0.5rem' }} />
+                                    {t('apartments.unit')}
+                                </th>
+                                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', minWidth: '150px', position: 'sticky', left: '80px', background: 'var(--bg-table-header)', zIndex: 2 }}>
+                                    {t('apartments.owner_name')}
+                                </th>
+                                {months.map(m => (
+                                    <th key={m.num} style={{ padding: '1rem', textAlign: 'center', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)', minWidth: '60px' }}>
+                                        {t(`months.${m.short.toLowerCase()}`)}
+                                    </th>
+                                ))}
+                                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', minWidth: '80px' }}>
+                                    {t('common.total')}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredData.map(({ apartment, payments }) => {
+                                const paidCount = payments.filter(p => p.status === 'PAID').length;
+                                return (
+                                    <tr key={apartment.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                                        <td style={{ padding: '1rem', fontWeight: 800, fontSize: '1rem', position: 'sticky', left: 0, background: 'var(--bg-card)', zIndex: 1 }}>
+                                            {apartment.number}
+                                        </td>
+                                        <td style={{ padding: '1rem', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', position: 'sticky', left: '80px', background: 'var(--bg-card)', zIndex: 1 }}>
+                                            {apartment.resident_name || apartment.residentName || '-'}
+                                        </td>
+                                        {months.map(m => {
+                                            const payment = payments.find(p => Number(p.month) === Number(m.num));
+                                            const isPaid = payment?.status === 'PAID';
+                                            return (
+                                                <td key={m.num} style={{ padding: '0.5rem', textAlign: 'center' }}>
+                                                    {payment && (
+                                                        <ProtectedAction requires="modify">
+                                                            <motion.button
+                                                                whileHover={{ scale: 1.1 }}
+                                                                whileTap={{ scale: 0.95 }}
+                                                                onClick={() => togglePayment(payment)}
+                                                                style={{
+                                                                    width: '36px',
+                                                                    height: '36px',
+                                                                    borderRadius: '8px',
+                                                                    border: 'none',
+                                                                    background: isPaid ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+                                                                    color: isPaid ? '#10b981' : '#f43f5e',
+                                                                    cursor: 'pointer',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    transition: 'all 0.2s'
+                                                                }}
+                                                            >
+                                                                {isPaid ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
+                                                            </motion.button>
+                                                        </ProtectedAction>
+                                                    )}
+                                                </td>
+                                            );
+                                        })}
+                                        <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 900, fontSize: '1rem' }}>
+                                            {paidCount}/12
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     );
 };
 

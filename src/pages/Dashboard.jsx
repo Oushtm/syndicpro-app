@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Building2, Wallet, TrendingUp, TrendingDown, Clock,
     CheckCircle2, AlertTriangle, Plus, FileDown, ArrowUpRight, ArrowDownRight,
-    Receipt
+    Receipt, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,8 @@ import { useData } from '../context/DataContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { loadArabicFont, addHeader, addFooter, COMPANY_COLOR, TEXT_MUTED } from '../utils/pdfHelper';
+
+import ProtectedAction from '../components/ProtectedAction';
 
 const Dashboard = () => {
     const { apartments, payments, expenses, loading, selectedYear, setSelectedYear } = useData();
@@ -258,303 +260,372 @@ const Dashboard = () => {
     );
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }} className="dashboard-container animate-slide-up">
-            {/* Header & Controls */}
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)' }}>{t('dashboard.title')} <span style={{ color: 'var(--primary)' }}>{t('dashboard.hub')}</span></h1>
-                    <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>{t('dashboard.yearly_overview')} - {selectedYear}</p>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-card)', padding: '0.5rem', borderRadius: '1rem', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-light)' }}>
-                        <select
-                            value={selectedYear}
-                            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                            style={{
-                                width: 'auto',
-                                border: 'none',
-                                background: 'transparent',
-                                color: 'var(--text-primary)',
-                                fontWeight: 700,
-                                padding: '0.25rem 0.5rem',
-                                cursor: 'pointer'
-                            }}
+        <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }} className="dashboard-container animate-slide-up">
+                {/* Header & Controls */}
+                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)' }}>{t('dashboard.title')} <span style={{ color: 'var(--primary)' }}>{t('dashboard.hub')}</span></h1>
+                        <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>{t('dashboard.yearly_overview')} - {selectedYear}</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '1rem',
+                            background: 'var(--bg-card)',
+                            padding: '0.6rem',
+                            borderRadius: '1.25rem',
+                            boxShadow: 'var(--shadow-premium)',
+                            border: '1px solid var(--border-light)',
+                            minWidth: '200px',
+                            flex: '1'
+                        }}>
+                            <button
+                                onClick={() => setSelectedYear(Math.max(2026, selectedYear - 1))}
+                                className="btn-ghost"
+                                style={{
+                                    padding: '0.5rem',
+                                    borderRadius: '0.75rem',
+                                    opacity: selectedYear <= 2026 ? 0.3 : 1,
+                                    cursor: selectedYear <= 2026 ? 'default' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: 'var(--bg-active)',
+                                    border: 'none'
+                                }}
+                                disabled={selectedYear <= 2026}
+                            >
+                                <ChevronLeft size={22} strokeWidth={3} />
+                            </button>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--text-primary)', lineHeight: 1 }}>{selectedYear}</div>
+                                <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.2rem' }}>{t('dashboard.fiscal_year') || 'Fiscal Year'}</div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedYear(Math.min(2050, selectedYear + 1))}
+                                className="btn-ghost"
+                                style={{
+                                    padding: '0.5rem',
+                                    borderRadius: '0.75rem',
+                                    opacity: selectedYear >= 2050 ? 0.3 : 1,
+                                    cursor: selectedYear >= 2050 ? 'default' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: 'var(--bg-active)',
+                                    border: 'none'
+                                }}
+                                disabled={selectedYear >= 2050}
+                            >
+                                <ChevronRight size={22} strokeWidth={3} />
+                            </button>
+                        </div>
+                        <button
+                            className="btn-ghost"
+                            style={{ background: 'var(--bg-card)', border: 'none', boxShadow: 'var(--shadow-sm)', borderRadius: '1rem' }}
+                            onClick={() => setShowExportModal(true)}
+                            title={t('dashboard.export_report')}
                         >
-                            {years.map(y => (
-                                <option
-                                    key={y}
-                                    value={y}
-                                    style={{ background: 'var(--bg-card)', color: 'var(--text-primary)' }}
-                                >
-                                    {y}
-                                </option>
-                            ))}
-                        </select>
+                            <FileDown size={20} />
+                            <span>{t('dashboard.export_report')}</span>
+                        </button>
+                        <button className="btn-primary" onClick={() => navigate('/expenses')}>
+                            <Plus size={18} />
+                            <span>{t('dashboard.record_expense')}</span>
+                        </button>
                     </div>
-                    <button
-                        className="btn-ghost"
-                        style={{ height: '3rem', background: 'var(--bg-card)', border: 'none', boxShadow: 'var(--shadow-sm)', borderRadius: '1rem' }}
-                        onClick={() => setShowExportModal(true)}
-                        title={t('dashboard.export_report')}
-                    >
-                        <FileDown size={20} />
-                        <span>{t('dashboard.export_report')}</span>
-                    </button>
-                    <button className="btn-primary" onClick={() => navigate('/expenses')}>
-                        <Plus size={18} />
-                        <span>{t('dashboard.record_expense')}</span>
-                    </button>
+                </header>
+
+                <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+                    <SummaryCard title={t('dashboard.total_units')} value={summary.totalApartments} sub={t('dashboard.registered')} icon={<Building2 />} color="var(--primary)" />
+                    <SummaryCard title={t('dashboard.paid_contributions')} value={summary.totalPaidRecords} sub={t('dashboard.this_year')} icon={<CheckCircle2 />} color="#10b981" />
+                    <SummaryCard title={t('dashboard.pending_contributions')} value={summary.totalPotentialRecords - summary.totalPaidRecords} sub={t('dashboard.this_year')} icon={<Clock />} color="#f43f5e" />
+                    <SummaryCard title={t('dashboard.total_balance')} value={`${(summary.balance).toLocaleString()} DH`} sub={t('dashboard.net_reserve')} icon={<Wallet />} color="#6366f1" />
                 </div>
-            </header>
 
-            <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
-                <SummaryCard title={t('dashboard.total_units')} value={summary.totalApartments} sub={t('dashboard.registered')} icon={<Building2 />} color="var(--primary)" />
-                <SummaryCard title={t('dashboard.paid_contributions')} value={summary.totalPaidRecords} sub={t('dashboard.this_year')} icon={<CheckCircle2 />} color="#10b981" />
-                <SummaryCard title={t('dashboard.pending_contributions')} value={summary.totalPotentialRecords - summary.totalPaidRecords} sub={t('dashboard.this_year')} icon={<Clock />} color="#f43f5e" />
-                <SummaryCard title={t('dashboard.total_balance')} value={`${(summary.balance).toLocaleString()} DH`} sub={t('dashboard.net_reserve')} icon={<Wallet />} color="#6366f1" />
-            </div>
-
-            <div className="dashboard-main-split" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    <div className="financial-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-                        <FinancialCard
-                            title={t('dashboard.income')}
-                            amount={financials.totalIncome}
-                            change={financials.incomeChange}
-                            icon={<TrendingUp />}
-                            positive
-                        />
-                        <FinancialCard
-                            title={t('dashboard.expenses')}
-                            amount={financials.totalExpenses}
-                            change={financials.expenseChange}
-                            icon={<TrendingDown />}
-                            danger
-                        />
-                        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{t('dashboard.collection_rate')}</p>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>{collectionRate}%</span>
-                                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{summary.totalPaidRecords}/{summary.totalPotentialRecords} {t('dashboard.paid_of_year')}</span>
-                            </div>
-                            <div style={{ height: '8px', background: 'var(--bg-active)', borderRadius: '10px', overflow: 'hidden' }}>
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${collectionRate}%` }}
-                                    style={{ height: '100%', background: 'var(--primary)', borderRadius: '10px' }}
-                                />
+                <div className="dashboard-main-split" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div className="financial-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+                            <FinancialCard
+                                title={t('dashboard.income')}
+                                amount={financials.totalIncome}
+                                change={financials.incomeChange}
+                                icon={<TrendingUp />}
+                                positive
+                            />
+                            <FinancialCard
+                                title={t('dashboard.expenses')}
+                                amount={financials.totalExpenses}
+                                change={financials.expenseChange}
+                                icon={<TrendingDown />}
+                                danger
+                            />
+                            <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{t('dashboard.collection_rate')}</p>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>{collectionRate}%</span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{summary.totalPaidRecords}/{summary.totalPotentialRecords} {t('dashboard.paid_of_year')}</span>
+                                </div>
+                                <div style={{ height: '8px', background: 'var(--bg-active)', borderRadius: '10px', overflow: 'hidden' }}>
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${collectionRate}%` }}
+                                        style={{ height: '100%', background: 'var(--primary)', borderRadius: '10px' }}
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="activity-split" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
-                        <div className="card" style={{ padding: 0 }}>
-                            <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)' }}>
-                                <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>{t('dashboard.collection_progress')}</h3>
-                                <button className="btn-ghost" style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }} onClick={() => navigate('/payments')}>View Details</button>
-                            </div>
-                            <div style={{ overflowX: 'auto', maxHeight: '400px' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                    <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 10 }}>
-                                        <tr>
-                                            <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem' }}>{t('dashboard.unit')}</th>
-                                            <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem' }}>{t('dashboard.owner')}</th>
-                                            <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem' }}>{t('dashboard.annual_status')}</th>
-                                            <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem', textAlign: 'right' }}>{t('dashboard.total_paid')}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {apartments.map(apt => {
-                                            const aptPayments = payments.filter(p => p.apartment_id === apt.id);
-                                            const paidCount = aptPayments.filter(p => p.status === 'PAID').length;
-                                            const totalAmount = aptPayments.filter(p => p.status === 'PAID').reduce((acc, curr) => acc + (curr.amount || 0), 0);
-
-                                            return (
-                                                <tr key={apt.id}>
-                                                    <td style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>{t('apartments.unit')} {apt.number || '??'}</td>
-                                                    <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{apt.resident_name || apt.residentName || 'Anonymous'}</td>
-                                                    <td style={{ padding: '1rem 1.5rem' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                            <div style={{ flex: 1, height: '6px', background: 'var(--bg-active)', borderRadius: '10px', overflow: 'hidden', minWidth: '60px' }}>
-                                                                <div style={{ height: '100%', width: `${(paidCount / 12) * 100}%`, background: paidCount === 12 ? '#10b981' : 'var(--primary)', borderRadius: '10px' }} />
-                                                            </div>
-                                                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: paidCount === 12 ? '#10b981' : 'var(--text-primary)' }}>{paidCount}/12</span>
-                                                        </div>
-                                                    </td>
-                                                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 800 }}>{totalAmount.toLocaleString()} DH</td>
-                                                </tr>
-                                            );
-                                        })}
-                                        {apartments.length === 0 && (
+                        <div className="activity-split" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                            <div className="card" style={{ padding: 0 }}>
+                                <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)' }}>
+                                    <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>{t('dashboard.collection_progress')}</h3>
+                                    <button className="btn-ghost" style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }} onClick={() => navigate('/payments')}>View Details</button>
+                                </div>
+                                <div style={{ overflowX: 'auto', maxHeight: '400px' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-card)', zIndex: 10 }}>
                                             <tr>
-                                                <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{t('dashboard.no_data')}</td>
+                                                <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem' }}>{t('dashboard.unit')}</th>
+                                                <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem' }}>{t('dashboard.owner')}</th>
+                                                <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem' }}>{t('dashboard.annual_status')}</th>
+                                                <th style={{ padding: '1rem 1.5rem', fontSize: '0.7rem', textAlign: 'right' }}>{t('dashboard.total_paid')}</th>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                        </thead>
+                                        <tbody>
+                                            {apartments.map(apt => {
+                                                const aptPayments = payments.filter(p => p.apartment_id === apt.id);
+                                                const paidCount = aptPayments.filter(p => p.status === 'PAID').length;
+                                                const totalAmount = aptPayments.filter(p => p.status === 'PAID').reduce((acc, curr) => acc + (curr.amount || 0), 0);
 
-                        <div className="card">
-                            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1.5rem' }}>{t('dashboard.expense_breakdown')}</h3>
-                            <div style={{ width: '100%', height: '260px', marginBottom: '1rem', position: 'relative' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={expenseCategories}
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            paddingAngle={5}
-                                            dataKey="_sum.amount"
-                                            nameKey="category"
-                                        >
-                                            {expenseCategories.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                                return (
+                                                    <tr key={apt.id}>
+                                                        <td style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>{t('apartments.unit')} {apt.number || '??'}</td>
+                                                        <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{apt.resident_name || apt.residentName || 'Anonymous'}</td>
+                                                        <td style={{ padding: '1rem 1.5rem' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                <div style={{ flex: 1, height: '6px', background: 'var(--bg-active)', borderRadius: '10px', overflow: 'hidden', minWidth: '60px' }}>
+                                                                    <div style={{ height: '100%', width: `${(paidCount / 12) * 100}%`, background: paidCount === 12 ? '#10b981' : 'var(--primary)', borderRadius: '10px' }} />
+                                                                </div>
+                                                                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: paidCount === 12 ? '#10b981' : 'var(--text-primary)' }}>{paidCount}/12</span>
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 800 }}>{totalAmount.toLocaleString()} DH</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            {apartments.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{t('dashboard.no_data')}</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {expenseCategories.map((cat, i) => (
-                                    <div key={cat.category} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{cat.category}</span>
+
+                            <div className="card">
+                                <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1.5rem' }}>{t('dashboard.expense_breakdown')}</h3>
+                                <div style={{ width: '100%', height: '260px', marginBottom: '1rem', position: 'relative' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={expenseCategories}
+                                                innerRadius={60}
+                                                outerRadius={80}
+                                                paddingAngle={5}
+                                                dataKey="_sum.amount"
+                                                nameKey="category"
+                                            >
+                                                {expenseCategories.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {expenseCategories.map((cat, i) => (
+                                        <div key={cat.category} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{cat.category}</span>
+                                            </div>
+                                            <span style={{ fontWeight: 800, fontSize: '0.85rem' }}>{cat._sum.amount.toLocaleString()} DH</span>
                                         </div>
-                                        <span style={{ fontWeight: 800, fontSize: '0.85rem' }}>{cat._sum.amount.toLocaleString()} DH</span>
-                                    </div>
-                                ))}
-                                {expenseCategories.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('dashboard.no_expenses')}</p>}
+                                    ))}
+                                    {expenseCategories.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('dashboard.no_expenses')}</p>}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div className="card" style={{ padding: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>{t('dashboard.recent_activity')}</h3>
-                            <Clock size={18} color="var(--text-muted)" />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div className="card" style={{ padding: '1.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>{t('dashboard.recent_activity')}</h3>
+                                <Clock size={18} color="var(--text-muted)" />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                {recentActivity.recentPayments.map(p => (
+                                    <ActivityItem
+                                        key={p.id}
+                                        title={`${t('nav.payments')}: ${t('apartments.unit')} ${p.apartment?.number || '??'}`}
+                                        sub={`${p.amount} DH • ${new Date(p.paid_at).toLocaleDateString(i18n.language)}`}
+                                        type="income"
+                                    />
+                                ))}
+                                {recentActivity.recentExpenses.map(e => (
+                                    <ActivityItem
+                                        key={e.id}
+                                        title={e.category}
+                                        sub={`${e.amount} DH • ${new Date(e.date).toLocaleDateString(i18n.language)}`}
+                                        type="expense"
+                                    />
+                                ))}
+                                {recentActivity.recentPayments.length === 0 && recentActivity.recentExpenses.length === 0 && (
+                                    <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('dashboard.no_activity')}</p>
+                                )}
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                            {recentActivity.recentPayments.map(p => (
-                                <ActivityItem
-                                    key={p.id}
-                                    title={`${t('nav.payments')}: ${t('apartments.unit')} ${p.apartment?.number || '??'}`}
-                                    sub={`${p.amount} DH • ${new Date(p.paid_at).toLocaleDateString(i18n.language)}`}
-                                    type="income"
-                                />
-                            ))}
-                            {recentActivity.recentExpenses.map(e => (
-                                <ActivityItem
-                                    key={e.id}
-                                    title={e.category}
-                                    sub={`${e.amount} DH • ${new Date(e.date).toLocaleDateString(i18n.language)}`}
-                                    type="expense"
-                                />
-                            ))}
-                            {recentActivity.recentPayments.length === 0 && recentActivity.recentExpenses.length === 0 && (
-                                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('dashboard.no_activity')}</p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', paddingLeft: '0.5rem' }}>{t('dashboard.system_alerts')}</h4>
+                            <AnimatePresence>
+                                {alerts.map(alert => (
+                                    <motion.div
+                                        key={alert.id}
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className={`card alert-${alert.type}`}
+                                        style={{
+                                            padding: '1rem',
+                                            display: 'flex',
+                                            gap: '1rem',
+                                            border: '1.5px solid var(--border-light)',
+                                            background: 'var(--bg-main)',
+                                            color: alert.type === 'danger' ? '#f43f5e' : '#fbbf24'
+                                        }}
+                                    >
+                                        <div style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.4)', borderRadius: '0.75rem' }}>
+                                            <AlertTriangle size={20} />
+                                        </div>
+                                        <p style={{ fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.4 }}>{alert.message}</p>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                            {alerts.length === 0 && (
+                                <div className="card" style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--bg-main)', border: '1.5px solid var(--border-light)' }}>
+                                    <CheckCircle2 size={24} color="#10b981" style={{ marginBottom: '0.5rem' }} />
+                                    <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>{t('dashboard.health_stable')}</p>
+                                </div>
                             )}
                         </div>
-                    </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', paddingLeft: '0.5rem' }}>{t('dashboard.system_alerts')}</h4>
-                        <AnimatePresence>
-                            {alerts.map(alert => (
-                                <motion.div
-                                    key={alert.id}
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    className={`card alert-${alert.type}`}
-                                    style={{
-                                        padding: '1rem',
-                                        display: 'flex',
-                                        gap: '1rem',
-                                        border: '1.5px solid var(--border-light)',
-                                        background: 'var(--bg-main)',
-                                        color: alert.type === 'danger' ? '#f43f5e' : '#fbbf24'
-                                    }}
-                                >
-                                    <div style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.4)', borderRadius: '0.75rem' }}>
-                                        <AlertTriangle size={20} />
-                                    </div>
-                                    <p style={{ fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.4 }}>{alert.message}</p>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                        {alerts.length === 0 && (
-                            <div className="card" style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--bg-main)', border: '1.5px solid var(--border-light)' }}>
-                                <CheckCircle2 size={24} color="#10b981" style={{ marginBottom: '0.5rem' }} />
-                                <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>{t('dashboard.health_stable')}</p>
+                        <div className="card" style={{ background: 'var(--primary)', color: 'white', padding: '1.5rem', border: 'none', boxShadow: 'var(--shadow-premium)' }}>
+                            <h3 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>{t('dashboard.quick_actions')}</h3>
+                            <p style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '1.5rem' }}>{t('dashboard.manual_entry')}</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <ShortcutBtn onClick={() => navigate('/apartments')} label={t('dashboard.add_apartment')} icon={<Building2 size={16} />} />
+                                <ShortcutBtn onClick={() => navigate('/expenses')} label={t('dashboard.record_expense')} icon={<Receipt size={16} />} />
+                                <ProtectedAction requires="modify">
+                                    <ShortcutBtn onClick={() => setShowExportModal(true)} label={t('dashboard.export_report')} icon={<FileDown size={16} />} />
+                                </ProtectedAction>
                             </div>
-                        )}
-                    </div>
-
-                    <div className="card" style={{ background: 'var(--primary)', color: 'white', padding: '1.5rem', border: 'none', boxShadow: 'var(--shadow-premium)' }}>
-                        <h3 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>{t('dashboard.quick_actions')}</h3>
-                        <p style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '1.5rem' }}>{t('dashboard.manual_entry')}</p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <ShortcutBtn onClick={() => navigate('/apartments')} label={t('dashboard.add_apartment')} icon={<Building2 size={16} />} />
-                            <ShortcutBtn onClick={() => navigate('/expenses')} label={t('dashboard.record_expense')} icon={<Receipt size={16} />} />
-                            <ShortcutBtn onClick={() => setShowExportModal(true)} label={t('dashboard.export_report')} icon={<FileDown size={16} />} />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Export Modal */}
-            {showExportModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="card"
-                        style={{ width: '400px', padding: '2rem', background: 'var(--bg-card)', border: '1px solid var(--border-light)' }}
-                    >
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>{t('dashboard.export_report')}</h2>
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Select the fiscal year for the annual financial report.</p>
+            <AnimatePresence>
+                {showExportModal && (
+                    <div style={{
+                        position: 'fixed',
+                        inset: 0,
+                        background: 'rgba(15, 23, 42, 0.75)',
+                        backdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                        padding: '1.5rem'
+                    }}>
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="card"
+                            style={{
+                                width: '100%',
+                                maxWidth: '400px',
+                                padding: '2rem',
+                                background: 'var(--bg-card)',
+                                border: '1px solid var(--border-light)',
+                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                            }}
+                        >
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>{t('dashboard.export_report')}</h2>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Select the fiscal year for the annual financial report.</p>
 
-                        <div style={{ marginBottom: '2rem' }}>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Fiscal Year</label>
-                            <select
-                                value={exportYear}
-                                onChange={(e) => setExportYear(parseInt(e.target.value))}
-                                className="form-input"
-                                style={{
-                                    width: '100%',
-                                    height: '3.5rem',
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1rem', textTransform: 'uppercase' }}>{t('dashboard.fiscal_year') || 'Fiscal Year'}</label>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
                                     background: 'var(--bg-main)',
-                                    color: 'var(--text-primary)',
-                                    border: '1.5px solid var(--border-light)',
-                                    borderRadius: '1rem',
-                                    padding: '0 1rem',
-                                    fontWeight: 700
-                                }}
-                            >
-                                {years.map(y => (
-                                    <option
-                                        key={y}
-                                        value={y}
-                                        style={{ background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                                    padding: '0.75rem',
+                                    borderRadius: '1.25rem',
+                                    border: '1.5px solid var(--border-light)'
+                                }}>
+                                    <button
+                                        onClick={() => setExportYear(Math.max(2026, exportYear - 1))}
+                                        className="btn-ghost"
+                                        style={{
+                                            padding: '0.5rem',
+                                            borderRadius: '0.75rem',
+                                            opacity: exportYear <= 2026 ? 0.3 : 1,
+                                            background: 'var(--bg-active)',
+                                            border: 'none'
+                                        }}
+                                        disabled={exportYear <= 2026}
                                     >
-                                        {y}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                                        <ChevronLeft size={20} strokeWidth={3} />
+                                    </button>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontWeight: 900, fontSize: '1.25rem' }}>{exportYear}</div>
+                                    </div>
+                                    <button
+                                        onClick={() => setExportYear(Math.min(2050, exportYear + 1))}
+                                        className="btn-ghost"
+                                        style={{
+                                            padding: '0.5rem',
+                                            borderRadius: '0.75rem',
+                                            opacity: exportYear >= 2050 ? 0.3 : 1,
+                                            background: 'var(--bg-active)',
+                                            border: 'none'
+                                        }}
+                                        disabled={exportYear >= 2050}
+                                    >
+                                        <ChevronRight size={20} strokeWidth={3} />
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button className="btn-ghost" style={{ flex: 1 }} onClick={() => setShowExportModal(false)}>{t('common.cancel')}</button>
-                            <button className="btn-primary" style={{ flex: 1 }} onClick={generateAnnualReport}>{i18n.language === 'ar' ? 'تصدير' : 'Export PDF'}</button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-        </div>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button className="btn-ghost" style={{ flex: 1 }} onClick={() => setShowExportModal(false)}>{t('common.cancel')}</button>
+                                <button className="btn-primary" style={{ flex: 1 }} onClick={generateAnnualReport}>{i18n.language === 'ar' ? 'تصدير' : 'Export PDF'}</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </>
     );
 };
 

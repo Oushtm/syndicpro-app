@@ -15,7 +15,7 @@ import ProtectedAction from '../components/ProtectedAction';
 const Expenses = () => {
     const { searchQuery, setSearchQuery } = useUI();
     const { t, i18n } = useTranslation();
-    const { expenses, loadingDetailed, selectedYear: year, setSelectedYear: setYear } = useData();
+    const { expenses, loadingDetailed, selectedYear: year, setSelectedYear: setYear, actions } = useData();
     const loading = loadingDetailed.expenses;
 
     const [showModal, setShowModal] = useState(false);
@@ -52,6 +52,9 @@ const Expenses = () => {
 
             if (error) throw error;
 
+            // Instant Refresh
+            await actions.fetchExpenses();
+
             setShowModal(false);
             setFormData({
                 category: 'MAINTENANCE',
@@ -79,6 +82,9 @@ const Expenses = () => {
                 .eq('id', expenseToDelete.id);
 
             if (error) throw error;
+
+            // Instant Refresh
+            await actions.fetchExpenses();
 
             setShowDeleteConfirm(false);
             setExpenseToDelete(null);
@@ -146,14 +152,14 @@ const Expenses = () => {
                 </header>
 
                 {/* Quick Metrics */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+                <div className="expenses-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
                     <MetricBox title={t('expenses_page.total_outflow')} value={`${totalSpent.toLocaleString()} DH`} icon={<Wallet size={24} />} trend={`-12% ${t('expenses_page.vs_last_month')}`} type="danger" />
                     <MetricBox title={t('expenses_page.active_contracts')} value={expenses.length} icon={<Receipt size={24} />} trend={t('expenses_page.updated_daily')} type="primary" />
                     <MetricBox title={t('expenses_page.budget_health')} value={t('expenses_page.stable')} icon={<CheckCircle2 size={24} />} trend={`98% ${t('expenses_page.efficiency')}`} type="success" />
                 </div>
 
-                {/* Ledger Table Section */}
-                <div className="card" style={{ padding: 0, overflow: 'hidden', boxShadow: 'var(--shadow-lg)' }}>
+                {/* Ledger Table Section - Desktop */}
+                <div className="card hide-mobile" style={{ padding: 0, overflow: 'hidden', boxShadow: 'var(--shadow-lg)' }}>
                     <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>{t('expenses_page.ledger')}</h3>
@@ -225,6 +231,58 @@ const Expenses = () => {
                         </table>
                     </div>
                 </div>
+
+                {/* Ledger Section - Mobile */}
+                <div className="hide-desktop">
+                    <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>{t('expenses_page.ledger')}</h3>
+                        <span style={{ padding: '0.25rem 0.75rem', background: 'var(--bg-card)', borderRadius: '2rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}>
+                            {filteredExpenses.length} {t('expenses_page.records_found')}
+                        </span>
+                    </div>
+
+                    <div className="mobile-expenses-grid" style={{ display: 'grid', gap: '1rem' }}>
+                        {filteredExpenses.map(exp => {
+                            const cat = categories.find(c => c.value === exp.category) || categories[5];
+                            return (
+                                <div key={exp.id} className="card mobile-expense-card" style={{ padding: '1.25rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: cat.bg, color: cat.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                {cat.icon}
+                                            </div>
+                                            <div>
+                                                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                                                    {t(`expenses_page.${cat.value.toLowerCase()}`)}
+                                                </p>
+                                                <p style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                                    {new Date(exp.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <p style={{ fontSize: '1.1rem', fontWeight: 900, color: '#f43f5e' }}>
+                                                -{exp.amount.toLocaleString()} <span style={{ fontSize: '0.7rem' }}>DH</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem' }}>
+                                        <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)', flex: 1 }}>{exp.description}</p>
+                                        <ProtectedAction requires="modify">
+                                            <button
+                                                onClick={() => handleDeleteClick(exp)}
+                                                className="btn-ghost"
+                                                style={{ padding: '0.5rem', borderRadius: '0.75rem', color: '#ef4444', height: 'auto', background: 'rgba(239, 68, 68, 0.05)' }}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </ProtectedAction>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
 
             {/* Modal & Delete Confirm parts remain remarkably similar, just wrapped in AnimatePresence which is already there */}
@@ -255,85 +313,87 @@ const Expenses = () => {
                                 <button onClick={() => setShowModal(false)} style={{ background: 'var(--bg-active)', border: 'none', padding: '0.35rem', borderRadius: '0.6rem', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}><X size={16} /></button>
                             </div>
 
-                            <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.5rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {/* Form fields remain identical */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <label style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('expenses_page.category')}</label>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                                        {categories.map(c => (
-                                            <button
-                                                key={c.value}
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, category: c.value })}
-                                                style={{
-                                                    padding: '0.5rem 0.25rem',
-                                                    borderRadius: '1rem',
-                                                    border: '1.5px solid',
-                                                    borderColor: formData.category === c.value ? 'var(--primary)' : 'var(--border-light)',
-                                                    background: formData.category === c.value ? 'var(--primary-bg)' : 'var(--bg-input)',
-                                                    cursor: 'pointer',
-                                                    textAlign: 'center',
-                                                    transition: 'all 0.2s',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    gap: '0.25rem'
-                                                }}
-                                            >
-                                                <div style={{ color: formData.category === c.value ? 'var(--primary)' : c.color }}>{React.cloneElement(c.icon, { size: 16 })}</div>
-                                                <p style={{ fontSize: '0.6rem', fontWeight: 800, color: formData.category === c.value ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{t(`expenses_page.${c.value.toLowerCase()}`)}</p>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                        <label style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{t('expenses_page.date')}</label>
-                                        <input
-                                            type="date"
-                                            value={formData.date}
-                                            onChange={e => setFormData({ ...formData, date: e.target.value })}
-                                            required
-                                            style={{ height: '2.75rem', borderRadius: '0.8rem', border: '1.5px solid var(--border-light)', padding: '0 0.6rem', fontWeight: 700, fontSize: '0.85rem', background: 'var(--bg-input)', color: 'var(--text-primary)', width: '100%' }}
-                                        />
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                        <label style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{t('expenses_page.amount')}</label>
-                                        <div style={{ position: 'relative' }}>
-                                            <input
-                                                type="number"
-                                                placeholder="0"
-                                                value={formData.amount}
-                                                onChange={e => setFormData({ ...formData, amount: e.target.value })}
-                                                required
-                                                style={{ height: '2.75rem', borderRadius: '0.8rem', border: '1.5px solid var(--border-light)', padding: i18n.language === 'ar' ? '0 0.6rem 0 2rem' : '0 2rem 0 0.6rem', fontWeight: 900, fontSize: '0.9rem', background: 'var(--bg-input)', width: '100%' }}
-                                            />
-                                            <span style={{ position: 'absolute', [i18n.language === 'ar' ? 'left' : 'right']: '0.6rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--text-muted)', fontSize: '0.65rem' }}>DH</span>
+                            <div className="modal-scroll-area" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+                                <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.5rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('expenses_page.category')}</label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
+                                            {categories.map(c => (
+                                                <button
+                                                    key={c.value}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, category: c.value })}
+                                                    style={{
+                                                        padding: '0.6rem 0.25rem',
+                                                        borderRadius: '1rem',
+                                                        border: '2px solid',
+                                                        borderColor: formData.category === c.value ? 'var(--primary)' : 'transparent',
+                                                        background: formData.category === c.value ? 'var(--primary-bg)' : 'var(--bg-active)',
+                                                        cursor: 'pointer',
+                                                        textAlign: 'center',
+                                                        transition: 'all 0.2s',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '0.4rem',
+                                                        height: 'auto'
+                                                    }}
+                                                >
+                                                    <div style={{ color: formData.category === c.value ? 'var(--primary)' : c.color }}>{React.cloneElement(c.icon, { size: 20 })}</div>
+                                                    <p style={{ fontSize: '0.65rem', fontWeight: 800, color: formData.category === c.value ? 'var(--primary)' : 'var(--text-secondary)' }}>{t(`expenses_page.${c.value.toLowerCase()}`)}</p>
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
-                                </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                    <label style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{t('expenses_page.description')}</label>
-                                    <textarea
-                                        rows="2"
-                                        placeholder="Note..."
-                                        value={formData.description}
-                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                        required
-                                        style={{ borderRadius: '0.8rem', border: '1.5px solid var(--border-light)', padding: '0.6rem', fontWeight: 600, fontSize: '0.85rem', background: 'var(--bg-input)', resize: 'none' }}
-                                    />
-                                </div>
+                                    <div className="responsive-form-row" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{t('expenses_page.date')}</label>
+                                            <input
+                                                type="date"
+                                                value={formData.date}
+                                                onChange={e => setFormData({ ...formData, date: e.target.value })}
+                                                required
+                                                style={{ height: '3.25rem', borderRadius: '1rem', border: '1.5px solid var(--border-light)', padding: '0 0.75rem', fontWeight: 700, fontSize: '0.9rem', background: 'var(--bg-input)', color: 'var(--text-primary)', width: '100%' }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{t('expenses_page.amount')}</label>
+                                            <div style={{ position: 'relative' }}>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    value={formData.amount}
+                                                    onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                                                    required
+                                                    style={{ height: '3.25rem', borderRadius: '1rem', border: '1.5px solid var(--border-light)', padding: i18n.language === 'ar' ? '0 0.75rem 0 2.5rem' : '0 2.5rem 0 0.75rem', fontWeight: 900, fontSize: '1rem', background: 'var(--bg-input)', width: '100%' }}
+                                                />
+                                                <span style={{ position: 'absolute', [i18n.language === 'ar' ? 'left' : 'right']: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--text-muted)', fontSize: '0.75rem' }}>DH</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                <button
-                                    type="submit"
-                                    className="btn-primary"
-                                    style={{ height: '3.25rem', borderRadius: '1rem', fontSize: '0.9rem', fontWeight: 900, boxShadow: '0 12px 24px -8px rgba(107, 102, 255, 0.4)', marginTop: '0.25rem' }}
-                                >
-                                    {t('common.confirm')}
-                                </button>
-                            </form>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{t('expenses_page.description')}</label>
+                                        <textarea
+                                            rows="3"
+                                            placeholder={t('expenses_page.find_description')}
+                                            value={formData.description}
+                                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                            required
+                                            style={{ borderRadius: '1rem', border: '1.5px solid var(--border-light)', padding: '0.75rem', fontWeight: 600, fontSize: '0.9rem', background: 'var(--bg-input)', resize: 'none' }}
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="btn-primary"
+                                        style={{ height: '3.5rem', borderRadius: '1.25rem', fontSize: '1rem', fontWeight: 900, boxShadow: '0 12px 24px -8px rgba(107, 102, 255, 0.4)', marginTop: '0.5rem' }}
+                                    >
+                                        {t('common.confirm')}
+                                    </button>
+                                </form>
+                            </div>
                         </motion.div>
                     </div>
                 )}

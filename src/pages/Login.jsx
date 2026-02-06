@@ -45,15 +45,17 @@ const Login = () => {
     };
 
     return (
-        <div style={{
-            height: '100vh',
+        <div className="login-page-container" style={{
+            minHeight: '100vh',
+            minHeight: '100dvh',
             width: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             background: 'var(--bg-main)',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            padding: '1.25rem'
         }}>
             {/* Background Orbs */}
             <div style={{
@@ -82,6 +84,7 @@ const Login = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                className="login-card"
                 style={{
                     width: '100%',
                     maxWidth: '420px',

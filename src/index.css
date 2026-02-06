@@ -105,12 +105,14 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  height: 3rem;
 }
 
 .btn-primary {
   background: var(--primary);
   color: white;
   padding: 0.75rem 1.5rem;
+  height: 3rem;
 }
 
 .btn-primary:hover {
@@ -123,6 +125,7 @@ button {
   color: var(--text-secondary);
   border: 1px solid var(--border-light);
   padding: 0.75rem 1.5rem;
+  height: 3rem;
 }
 
 .btn-ghost:hover {
@@ -284,8 +287,19 @@ tr:hover td {
    MOBILE RESPONSIVENESS (Strict @media queries)
    ========================================================================== */
 
+
+/* Responsive Visibility Utilities */
+.hide-desktop {
+  display: none !important;
+}
+
+.hide-mobile {
+  display: block !important;
+}
+
 @media (max-width: 1024px) {
 
+  /* App Layout - Prevent overflow */
   /* 0. Root Scaling & Centering Rules */
   html,
   body {
@@ -379,24 +393,55 @@ tr:hover td {
     margin: 0 !important;
   }
 
+  /* Header Fixes - Critical for mobile */
   .app-header {
-    padding: 1.5rem 1rem !important;
+    padding: 1rem !important;
     height: auto !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 1.5rem !important;
-    background: var(--bg-main) !important;
-  }
-
-  .header-search {
-    width: 100% !important;
-    order: 2;
-  }
-
-  .header-user {
-    width: 100% !important;
+    min-height: 60px !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
     justify-content: space-between !important;
+    gap: 0.75rem !important;
+    background: var(--bg-main) !important;
+    overflow: visible !important;
+  }
+
+  /* Header Search - Shrink but keep visible */
+  .header-search {
+    flex: 0 1 auto !important;
+    min-width: 150px !important;
+    max-width: 200px !important;
     order: 1;
+  }
+
+  .header-search input {
+    font-size: 14px !important;
+    padding: 0.6rem 0.8rem 0.6rem 2.5rem !important;
+  }
+
+  /* Header User Profile - Compact layout */
+  .header-user {
+    flex-shrink: 0 !important;
+    order: 2;
+    max-width: 50% !important;
+  }
+
+  .header-user>div:last-child {
+    gap: 0.5rem !important;
+  }
+
+  .header-user p {
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 120px !important;
+  }
+
+  .header-user [style*="width: 48px"] {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
   }
 
   .page-container {
@@ -404,14 +449,30 @@ tr:hover td {
   }
 
   /* 2. Grid & Utility Re-stacking */
+  /* 2. Grid & Utility Re-stacking */
   .dashboard-grid,
   .financial-grid,
   .dashboard-main-split,
   .activity-split,
   .apartments-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: 100% !important;
+    max-width: 100% !important;
+    gap: 1rem !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure grid children don't overflow */
+  .dashboard-grid>*,
+  .financial-grid>*,
+  .dashboard-main-split>*,
+  .activity-split>*,
+  .apartments-grid>* {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
   }
 
   .page-header {
@@ -469,5 +530,467 @@ tr:hover td {
   .page-header+.card>div {
     width: 100% !important;
     min-width: 0 !important;
+  }
+
+  /* Dashboard Header - Stack vertically on tablet */
+  .dashboard-container>header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1.25rem !important;
+  }
+
+  /* Dashboard Header Controls - Full width row */
+  .dashboard-container>header>div:last-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  /* Year Selector - Match button height */
+  .dashboard-container>header>div:last-child>div:first-child {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 3.25rem !important;
+    padding: 0.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .dashboard-container>header>div:last-child>div:first-child select {
+    height: auto !important;
+    padding: 0.4rem 0.6rem !important;
+  }
+
+  /* Dashboard Action Buttons - Same size and spacing */
+  .dashboard-container>header button,
+  .dashboard-container>header .btn-ghost,
+  .dashboard-container>header .btn-primary {
+    width: 100% !important;
+    height: 3.25rem !important;
+    min-width: 0 !important;
+    flex: none !important;
+    justify-content: center !important;
+    padding: 0.75rem 1.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE BREAKPOINT (≤640px) - Fine-tuned for smartphones
+   ========================================================================== */
+
+@media (max-width: 640px) {
+
+  /* Dashboard Header - Centered layout */
+  .dashboard-container>header {
+    gap: 1.25rem !important;
+    padding: 0 !important;
+    align-items: center !important;
+    /* Center everything */
+    text-align: center !important;
+  }
+
+  /* Dashboard Header Title - Center */
+  .dashboard-container>header>div:first-child {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .dashboard-container>header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Dashboard Controls Row - Centered with equal spacing */
+  .dashboard-container>header>div:last-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    /* Full width children */
+    gap: 0.75rem !important;
+    /* Equal spacing */
+    width: 100% !important;
+  }
+
+  /* Year Selector - Full width, centered */
+  .dashboard-container>header>div:last-child>div:first-child {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* All Buttons - Same size */
+  .dashboard-container>header button,
+  .dashboard-container>header .btn-ghost,
+  .dashboard-container>header .btn-primary {
+    width: 100% !important;
+    height: 3.25rem !important;
+    /* Uniform height */
+    justify-content: center !important;
+  }
+
+  /* 1. Typography Scaling for Readability */
+  h1 {
+    font-size: 1.5rem !important;
+    /* Smaller h1 for phone screens */
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+  }
+
+  p,
+  span,
+  label {
+    font-size: 0.9rem;
+    /* Slightly smaller body text */
+  }
+
+  /* 2. Card & Layout Adjustments */
+  .card {
+    padding: 1rem !important;
+    /* Tighter padding on mobile */
+    border-radius: 1rem !important;
+    /* Slightly smaller radius */
+  }
+
+  .page-root-container {
+    padding: 0.75rem !important;
+    /* Tighter page padding */
+  }
+
+  /* 3. Dashboard KPI Cards - Stack cleanly */
+  .dashboard-grid {
+    gap: 0.75rem !important;
+  }
+
+  /* 4. Form Inputs - Full width, touch friendly */
+  input,
+  select,
+  textarea {
+    width: 100% !important;
+    min-height: 3rem !important;
+    font-size: 16px !important;
+    /* iOS zoom prevention */
+  }
+
+  /* 5. Buttons - Full width, larger touch targets */
+  button,
+  .btn-primary,
+  .btn-ghost {
+    min-height: 3rem !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* 6. Table Cell Padding - Compact for mobile */
+  th,
+  td {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* 7. Sidebar Tab Trigger - Larger for thumb reach */
+  .sidebar::after {
+    padding: 14px 28px !important;
+    font-size: 0.8rem !important;
+    top: 30% !important;
+    /* Lower for easier thumb access */
+  }
+
+  /* 8. Header Adjustments */
+  .app-header {
+    padding: 1rem 0.75rem !important;
+    gap: 1rem !important;
+  }
+
+  .page-header {
+    gap: 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* 9. Modal/Dialog Adjustments */
+  .card[style*="position: fixed"],
+  .modal-content {
+    width: 95% !important;
+    max-width: 95vw !important;
+    padding: 1.5rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  /* 10. Year Selector - Compact */
+  .year-selector,
+  [style*="display: flex"][style*="alignItems: center"][style*="gap"] {
+    gap: 0.5rem !important;
+  }
+
+  /* 11. Charts - Ensure minimum usable height */
+  .recharts-responsive-container {
+    min-height: 250px !important;
+  }
+
+  /* 12. RTL Safe - Mirror adjustments */
+  [dir="rtl"] .sidebar::after {
+    top: 30% !important;
+  }
+
+  /* 13. Badge Scaling */
+  .badge {
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* 14. Settings Page Grid - Single column on mobile */
+  [style*="grid-template-columns: 280px 1fr"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+  }
+
+  /* 15. Settings Sidebar - Full width on mobile */
+  [style*="grid-template-columns: 280px 1fr"]>div:first-child {
+    width: 100% !important;
+  }
+
+  /* 16. Apartments Grid - Ensure single column */
+  .apartments-grid,
+  [style*="gridTemplateColumns"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 17. Expense/Payment Status Indicators */
+  .status-indicator {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  /* 18. Action Buttons Row - Stack vertically */
+  [style*="display: flex"][style*="gap: 1rem"]:has(button) {
+    flex-direction: row !important;
+    /* Keep buttons in row if possible */
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  /* 19. Quick Actions Card */
+  .quick-actions-card {
+    padding: 1rem !important;
+  }
+
+  /* 20. Year/Month Navigation */
+  [style*="display: flex"][style*="ChevronLeft"],
+  [style*="display: flex"][style*="ChevronRight"] {
+    gap: 0.25rem !important;
+  }
+
+  /* 21. Payments Page Specific Optimization */
+  .hide-desktop {
+    display: block !important;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .mobile-payments-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+    padding-bottom: 2rem;
+  }
+
+  .mobile-payment-card {
+    padding: 1.25rem !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 1.5rem !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: var(--transition) !important;
+  }
+
+  /* Login Page Mobile Centering */
+  .login-page-container {
+    padding: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .login-card {
+    padding: 1.5rem !important;
+    /* Smaller padding for mobile screens */
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 1.5rem !important;
+  }
+
+  .mobile-payment-card:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .mobile-month-toggle {
+    min-height: 4.5rem !important;
+    border: 1.5px solid transparent !important;
+    background: var(--bg-active) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+    transition: var(--transition) !important;
+  }
+
+  .mobile-month-toggle.paid {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1) !important;
+  }
+
+  /* 22. Expenses Page Specific Optimization */
+  .expenses-metrics-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .mobile-expense-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 1.5rem !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: var(--transition) !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mobile-expense-card:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .responsive-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .modal-scroll-area::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .modal-scroll-area::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 10px;
+  }
+
+  /* 23. Staff Management Specific Optimization */
+  .mobile-users-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .mobile-user-card {
+    padding: 1.5rem !important;
+    border-radius: 1.5rem !important;
+  }
+
+  .mobile-user-card:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  /* 24. Settings Page Optimization */
+  .settings-responsive-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .mobile-settings-nav {
+    padding: 0.75rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .settings-tabs-container {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    gap: 0.25rem !important;
+    /* Tighter gap for segmented control */
+    padding: 0.25rem !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+    background: var(--bg-active) !important;
+    /* Darker recessed track */
+    margin: 0 auto 1.5rem !important;
+    /* Centered on page */
+    border: 1px solid var(--border-light) !important;
+    border-radius: 100px !important;
+    /* pill shape */
+    backdrop-filter: blur(12px) !important;
+    width: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .settings-tabs-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-tabs-container button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    padding: 0.6rem 1.25rem !important;
+    font-size: 0.8rem !important;
+    gap: 0.5rem !important;
+    border-radius: 100px !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .tab-nav-highlight {
+    display: block !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    /* Glass effect */
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    inset: 0 !important;
+    z-index: -1 !important;
+    border-radius: 100px !important;
+  }
+
+  .settings-tabs-container button.active {
+    color: var(--primary) !important;
+    font-weight: 800 !important;
+  }
+
+
+  .settings-tab-content {
+    padding: 1.5rem !important;
+    border-radius: 1.75rem !important;
+    text-align: center !important;
+  }
+
+  .settings-tab-content>div:first-child>div:first-child {
+    margin: 0 auto 1.5rem !important;
+  }
+
+  /* Header Overrides for Mobile */
+  .page-root-container header.page-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 1.25rem !important;
+  }
+
+  .page-root-container header.page-header>div:last-child {
+    width: 100% !important;
+    display: flex !important;
+    gap: 0.75rem !important;
+  }
+
+  .page-root-container header.page-header>div:last-child>div:first-child {
+    flex: 1 !important;
+    margin-bottom: 0 !important;
   }
 }

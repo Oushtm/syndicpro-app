@@ -109,17 +109,17 @@ const Settings = () => {
     };
 
     return (
-        <div style={{
-            padding: '2rem',
+        <div className="page-root-container animate-slide-up" style={{
             maxWidth: '1200px',
             margin: '0 auto',
             minHeight: 'calc(100vh - 80px)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '2rem'
+            gap: '2rem',
+            paddingBottom: '3rem'
         }}>
             {/* Header Area */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -135,28 +135,30 @@ const Settings = () => {
                     </h1>
                 </motion.div>
 
-                <div style={{
-                    padding: '0.75rem 1.25rem',
-                    borderRadius: '1.25rem',
+                <div className="guest-admin-banner" style={{
+                    padding: '0.6rem 1rem',
+                    borderRadius: '1rem',
                     background: 'var(--primary)',
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.75rem',
+                    gap: '0.6rem',
                     fontWeight: 700,
-                    fontSize: '0.9rem',
-                    boxShadow: 'var(--shadow-premium)'
+                    fontSize: '0.8rem',
+                    boxShadow: 'var(--shadow-premium)',
+                    whiteSpace: 'nowrap'
                 }}>
-                    <Shield size={18} />
+                    <Shield size={16} />
                     <span>{t('settings.guest_admin_mode') || 'Guest Admin Mode'}</span>
                 </div>
-            </div>
+            </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', alignItems: 'start' }}>
+            <div className="settings-responsive-grid" style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', alignItems: 'start' }}>
                 {/* Navigation Sidebar */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
+                    className="mobile-settings-nav"
                     style={{
                         ...glassStyle,
                         borderRadius: '2rem',
@@ -166,47 +168,52 @@ const Settings = () => {
                         gap: '0.5rem'
                     }}
                 >
-                    <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em', paddingLeft: '0.75rem' }}>{t('settings.preferences') || 'Preferences'}</p>
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                padding: '1rem 1.25rem',
-                                borderRadius: '1.25rem',
-                                border: 'none',
-                                background: activeTab === tab.id ? 'var(--primary)' : 'transparent',
-                                color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
-                                fontWeight: 700,
-                                fontSize: '0.95rem',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                textAlign: 'left',
-                                position: 'relative'
-                            }}
-                        >
-                            <span style={{ zIndex: 2 }}>{tab.icon}</span>
-                            <span style={{ zIndex: 2 }}>{tab.label}</span>
-                            {activeTab === tab.id && (
-                                <motion.div
-                                    layoutId="tab-highlight"
-                                    style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        background: 'var(--primary)',
-                                        borderRadius: '1.25rem',
-                                        zIndex: 1,
-                                        boxShadow: '0 10px 20px -5px var(--primary-light)'
-                                    }}
-                                />
-                            )}
-                        </button>
-                    ))}
+                    <p className="hide-mobile" style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em', paddingLeft: '0.75rem' }}>{t('settings.preferences') || 'Preferences'}</p>
+                    <div className="settings-tabs-container" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`tab-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '1rem',
+                                    padding: '1rem 1.25rem',
+                                    borderRadius: '1.25rem',
+                                    border: 'none',
+                                    background: activeTab === tab.id ? 'var(--primary)' : 'transparent',
+                                    color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
+                                    fontWeight: 700,
+                                    fontSize: '0.95rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    textAlign: 'left',
+                                    position: 'relative',
+                                    width: '100%'
+                                }}
+                            >
+                                <span style={{ zIndex: 2 }}>{tab.icon}</span>
+                                <span style={{ zIndex: 2 }}>{tab.label}</span>
+                                {activeTab === tab.id && (
+                                    <motion.div
+                                        layoutId="tab-highlight"
+                                        className="tab-nav-highlight"
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            background: 'var(--primary)',
+                                            borderRadius: '1.25rem',
+                                            zIndex: 1,
+                                            boxShadow: '0 10px 20px -5px var(--primary-light)'
+                                        }}
+                                    />
+                                )}
+                            </button>
+                        ))}
+                    </div>
 
-                    <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-light)' }}>
+                    <div className="hide-mobile" style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-light)' }}>
                         <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{
                                 width: '36px',
@@ -240,7 +247,7 @@ const Settings = () => {
                             transition={{ duration: 0.3 }}
                         >
                             {activeTab === 'building' && (
-                                <div style={{ ...glassStyle, borderRadius: '2.5rem', padding: '3rem' }}>
+                                <div className="settings-tab-content" style={{ ...glassStyle, borderRadius: '2.5rem', padding: '3rem' }}>
                                     <div style={{ marginBottom: '2.5rem' }}>
                                         <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
                                             <Building2 size={24} />
@@ -297,7 +304,7 @@ const Settings = () => {
                                             />
                                         </div>
 
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+                                        <div className="responsive-form-row" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
                                             <div className="form-group">
                                                 <label style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem', display: 'block' }}>
                                                     {t('settings.default_fee') || 'Standard Monthly Contribution'}
@@ -307,20 +314,24 @@ const Settings = () => {
                                                         type="number"
                                                         value={formData.defaultMonthlyFee}
                                                         onChange={(e) => setFormData({ ...formData, defaultMonthlyFee: e.target.value })}
+                                                        disabled={!isAdmin()}
+                                                        title={!isAdmin() ? "Only Admins can change this" : ""}
                                                         style={{
                                                             width: '100%',
                                                             padding: '1rem 4rem 1rem 1.25rem',
                                                             borderRadius: '1rem',
                                                             border: '2.5px solid var(--border-light)',
-                                                            background: 'var(--bg-main)',
-                                                            color: 'var(--text-primary)',
+                                                            background: !isAdmin() ? 'var(--bg-main-dim)' : 'var(--bg-main)',
+                                                            color: !isAdmin() ? 'var(--text-muted)' : 'var(--text-primary)',
                                                             fontSize: '1rem',
-                                                            fontWeight: 600
+                                                            fontWeight: 600,
+                                                            cursor: !isAdmin() ? 'not-allowed' : 'text'
                                                         }}
                                                     />
                                                     <span style={{ position: 'absolute', right: '1.25rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--text-muted)' }}>
                                                         {formData.currency}
                                                     </span>
+                                                    {!isAdmin() && <Lock size={14} style={{ position: 'absolute', right: '3rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />}
                                                 </div>
                                             </div>
                                             <div className="form-group">
@@ -388,7 +399,7 @@ const Settings = () => {
                             )}
 
                             {activeTab === 'appearance' && (
-                                <div style={{ ...glassStyle, borderRadius: '2.5rem', padding: '3rem' }}>
+                                <div className="settings-tab-content" style={{ ...glassStyle, borderRadius: '2.5rem', padding: '3rem' }}>
                                     <div style={{ marginBottom: '2.5rem' }}>
                                         <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
                                             <Palette size={24} />
@@ -404,7 +415,11 @@ const Settings = () => {
                                             <label style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem', display: 'block' }}>
                                                 {t('settings.language_pref') || 'System Language'}
                                             </label>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+                                            <div style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                                                gap: '1rem'
+                                            }}>
                                                 {[
                                                     { id: 'en', label: 'English', sub: 'Primary' },
                                                     { id: 'fr', label: 'Français', sub: 'Secondaire' },
@@ -447,7 +462,7 @@ const Settings = () => {
                             )}
 
                             {activeTab === 'status' && (
-                                <div style={{ ...glassStyle, borderRadius: '2.5rem', padding: '3rem' }}>
+                                <div className="settings-tab-content" style={{ ...glassStyle, borderRadius: '2.5rem', padding: '3rem' }}>
                                     <div style={{ marginBottom: '2.5rem' }}>
                                         <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
                                             <Cpu size={24} />
@@ -458,7 +473,7 @@ const Settings = () => {
                                         <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>System performance and connection status.</p>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                                    <div className="responsive-form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
                                         {[
                                             { label: 'Database', status: 'Operational', icon: <Database size={18} /> },
                                             { label: 'Authentication', status: 'Secure', icon: <Shield size={18} /> },
