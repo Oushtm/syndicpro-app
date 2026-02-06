@@ -145,7 +145,7 @@ const Apartments = () => {
             roommates: [],
             status: 'occupied',
             amount: 0,
-            monthlyTotal: 0,
+            monthlyTotal: appSettings?.default_monthly_fee || 200,
             email: '',
             phone: ''
         });

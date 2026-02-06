@@ -58,7 +58,7 @@ const Payments = () => {
                     paymentsToInsert.push({
                         month: m,
                         year: parseInt(year),
-                        amount: 200, // Default amount
+                        amount: parseFloat(apt.monthly_total || appSettings?.default_monthly_fee || 200),
                         status: 'UNPAID',
                         apartment_id: apt.id,
                         created_at: new Date().toISOString()

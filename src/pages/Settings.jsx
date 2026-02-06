@@ -9,9 +9,11 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import { useTranslation } from 'react-i18next';
+import { useData } from '../context/DataContext';
 
 const Settings = () => {
     const { user, userProfile, isAdmin } = useAuth();
+    const { actions } = useData();
     const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState('building');
     const [saving, setSaving] = useState(false);
@@ -83,6 +85,22 @@ const Settings = () => {
                 });
 
             if (error) throw error;
+
+            // STEP 2: Update all apartments to use the new fee (AS REQUESTED)
+            // This ensures "monthly_total" for each unit changes to the new setting
+            const newFee = parseInt(formData.defaultMonthlyFee);
+            const { error: aptError } = await supabase
+                .from('apartments')
+                .update({ monthly_total: newFee });
+
+            if (aptError) {
+                console.error("Failed to bulk update apartment fees:", aptError);
+                // We don't throw here to avoid blocking settings save, but log it
+            }
+
+            // Trigger global refresh
+            if (actions?.refreshSettings) await actions.refreshSettings();
+            if (actions?.fetchApartments) await actions.fetchApartments();
 
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);

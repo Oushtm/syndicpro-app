@@ -14,7 +14,7 @@ export const DataProvider = ({ children }) => {
     const [apartments, setApartments] = useState([]);
     const [payments, setPayments] = useState([]);
     const [expenses, setExpenses] = useState([]);
-    const [appSettings, setAppSettings] = useState({ buildingName: 'SyndicPro' });
+    const [appSettings, setAppSettings] = useState({ buildingName: 'SyndicPro', default_monthly_fee: 200 });
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
     // Sync Status (Legacy support: Supabase writes are instant or fail)
@@ -154,17 +154,20 @@ export const DataProvider = ({ children }) => {
         appSettings,
         selectedYear,
         setSelectedYear,
-        loading: loadingApartments || loadingPayments || loadingExpenses,
+        loading: loadingApartments || loadingPayments || loadingExpenses || loadingAppSettings,
         loadingDetailed: {
             apartments: loadingApartments,
             payments: loadingPayments,
-            expenses: loadingExpenses
+            expenses: loadingExpenses,
+            appSettings: loadingAppSettings
         },
         error,
         actions: {
             fetchApartments,
             fetchPayments,
             fetchExpenses,
+            fetchAppSettings, // Expose fetchAppSettings as refreshSettings
+            refreshSettings: fetchAppSettings,
             updatePaymentOptimistically: (paymentId, updates) => {
                 setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, ...updates } : p));
             }
