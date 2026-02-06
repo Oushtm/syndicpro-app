@@ -13,7 +13,7 @@ import { useData } from '../context/DataContext';
 
 const Settings = () => {
     const { user, userProfile, isAdmin } = useAuth();
-    const { actions } = useData();
+    const { actions, selectedYear } = useData();
     const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState('building');
     const [saving, setSaving] = useState(false);
@@ -95,12 +95,22 @@ const Settings = () => {
 
             if (aptError) {
                 console.error("Failed to bulk update apartment fees:", aptError);
-                // We don't throw here to avoid blocking settings save, but log it
+            }
+
+            // STEP 3: Update all payments for the current year to use the new fee
+            const { error: payError } = await supabase
+                .from('payments')
+                .update({ amount: newFee })
+                .eq('year', parseInt(selectedYear));
+
+            if (payError) {
+                console.error("Failed to bulk update payment amounts:", payError);
             }
 
             // Trigger global refresh
             if (actions?.refreshSettings) await actions.refreshSettings();
             if (actions?.fetchApartments) await actions.fetchApartments();
+            if (actions?.fetchPayments) await actions.fetchPayments();
 
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
