@@ -21,7 +21,7 @@ import { supabase } from '../supabase';
 import ProtectedAction from '../components/ProtectedAction';
 
 const Payments = () => {
-    const { apartments, payments: allPayments, loadingDetailed, selectedYear: year, setSelectedYear: setYear, actions } = useData();
+    const { apartments, payments: allPayments, appSettings, loadingDetailed, selectedYear: year, setSelectedYear: setYear, actions } = useData();
     const [generating, setGenerating] = useState(false);
     const { searchQuery } = useUI();
     const { t, i18n } = useTranslation();

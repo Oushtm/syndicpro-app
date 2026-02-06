@@ -14,7 +14,7 @@ import { useAuth } from '../context/AuthContext';
 const Apartments = () => {
     const { t } = useTranslation();
     const { isRTL } = useUI();
-    const { apartments, loadingDetailed, actions } = useData();
+    const { apartments, appSettings, loadingDetailed, actions } = useData();
     const { canModify } = useAuth();
     const loading = loadingDetailed.apartments;
 
