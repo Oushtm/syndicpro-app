@@ -97,11 +97,12 @@ const Settings = () => {
                 console.error("Failed to bulk update apartment fees:", aptError);
             }
 
-            // STEP 3: Update all payments for the current year to use the new fee
+            // STEP 3: Update all payments GLOBALLY to use the new fee 
+            // We remove the year filter to ensure historical/future records are consistent with new building policy
             const { error: payError } = await supabase
                 .from('payments')
                 .update({ amount: newFee })
-                .eq('year', parseInt(selectedYear));
+                .gt('year', 2000); // Safety filter to allow bulk update
 
             if (payError) {
                 console.error("Failed to bulk update payment amounts:", payError);

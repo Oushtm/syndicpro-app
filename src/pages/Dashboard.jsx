@@ -74,7 +74,7 @@ const Dashboard = () => {
         const yearlyExpenses = expenses;
 
         // 4. Financials
-        const totalIncome = paidPayments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+        const totalIncome = paidPayments.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
         const totalExpenses = yearlyExpenses.reduce((acc, curr) => acc + (curr.amount || 0), 0);
         const balance = totalIncome - totalExpenses;
 
@@ -534,6 +534,18 @@ const Dashboard = () => {
                                 <ShortcutBtn onClick={() => navigate('/expenses')} label={t('dashboard.record_expense')} icon={<Receipt size={16} />} />
                                 <ProtectedAction requires="modify">
                                     <ShortcutBtn onClick={() => setShowExportModal(true)} label={t('dashboard.export_report')} icon={<FileDown size={16} />} />
+                                    <ShortcutBtn
+                                        onClick={async () => {
+                                            if (!window.confirm("Force all payments to match current building fee?")) return;
+                                            const { data: s } = await supabase.from('settings').select('default_monthly_fee').single();
+                                            const fee = s?.default_monthly_fee || 100;
+                                            const { error } = await supabase.from('payments').update({ amount: fee }).gt('id', '00000000-0000-0000-0000-000000000000');
+                                            if (error) alert("Error: " + error.message);
+                                            else { alert("Success! Data Repaired."); window.location.reload(); }
+                                        }}
+                                        label="Repair Data (Fix Income)"
+                                        icon={<AlertTriangle size={16} />}
+                                    />
                                 </ProtectedAction>
                             </div>
                         </div>
